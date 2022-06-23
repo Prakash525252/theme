@@ -1,0 +1,96 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a paragraph.
+ *
+ * Available variables:
+ * - paragraph: Full paragraph entity.
+ *   Only method names starting with "get", "has", or "is" and a few common
+ *   methods such as "id", "label", and "bundle" are available. For example:
+ *   - paragraph.getCreatedTime() will return the paragraph creation timestamp.
+ *   - paragraph.id(): The paragraph ID.
+ *   - paragraph.bundle(): The type of the paragraph, for example, "image" or "text".
+ *   - paragraph.getOwnerId(): The user ID of the paragraph author.
+ *   See Drupal\paragraphs\Entity\Paragraph for a full list of public properties
+ *   and methods for the paragraph object.
+ * - content: All paragraph items. Use {{ content }} to print them all,
+ *   or print a subset such as {{ content.field_example }}. Use
+ *   {{ content|without('field_example') }} to temporarily suppress the printing
+ *   of a given child element.
+ * - attributes: HTML attributes for the containing element.
+ *   The attributes.class element may contain one or more of the following
+ *   classes:
+ *   - paragraphs: The current template type (also known as a "theming hook").
+ *   - paragraphs--type-[type]: The current paragraphs type. For example, if the paragraph is an
+ *     "Image" it would result in "paragraphs--type--image". Note that the machine
+ *     name will often be in a short form of the human readable label.
+ *   - paragraphs--view-mode--[view_mode]: The View Mode of the paragraph; for example, a
+ *     preview would result in: "paragraphs--view-mode--preview", and
+ *     default: "paragraphs--view-mode--default".
+ * - view_mode: View mode; for example, "preview" or "full".
+ * - logged_in: Flag for authenticated user status. Will be true when the
+ *   current user is a logged-in member.
+ * - is_admin: Flag for admin user status. Will be true when the current user
+ *   is an administrator.
+ *
+ * @see template_preprocess_paragraph()
+ *
+ * @ingroup themeable
+ */
+#}
+{%
+  set classes = [
+    'paragraph',
+    'paragraph--type--' ~ paragraph.bundle|clean_class,
+    view_mode ? 'paragraph--view-mode--' ~ view_mode|clean_class,
+    not paragraph.isPublished() ? 'paragraph--unpublished'
+  ]
+%}
+{% block paragraph %}
+    {% block content %}
+          <!-- Projects Start -->
+            <div class="container-fluid py-5">
+                <div class="container py-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-6 col-md-8 col text-center mb-4">
+                            <h6 class="text-primary font-weight-normal text-uppercase mb-3">{{content.field_our_project_main_title.0}}</h6>
+                            <h1 class="mb-4">{{content.field_our_project_sub_title.0}}</h1>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-center mb-2">
+                            <ul class="list-inline mb-4" id="portfolio-flters">
+                                <li class="btn btn-outline-primary m-1 active"  data-filter="*">All</li>
+                                {% for status in project_status %}
+                                    <li class="btn btn-outline-primary m-1" data-filter=".{{status.target_class}}">{{status.name}}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mx-1 portfolio-container">
+                         {% for project in projects %}
+                                <div class="col-lg-4 col-md-6 col-sm-12 p-0 portfolio-item {{project.class}}">
+                                    <div class="position-relative overflow-hidden">
+                                        <div class="portfolio-img d-flex align-items-center justify-content-center">
+                                            <img class="img-fluid" src="{{project.project_image_url}}" alt="">
+                                        </div>
+                                        <div class="portfolio-text bg-secondary d-flex flex-column align-items-center justify-content-center">
+                                            <h4 class="text-white mb-4">{{project.project_title}}</h4>
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                <a class="btn btn-outline-primary m-1" href="{{project.project_url}}">
+                                                    <i class="fa fa-link"></i>
+                                                </a>
+                                                <a class="btn btn-outline-primary m-1" href="{{project.project_image_url}}" data-lightbox="portfolio">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <!-- Projects End -->
+    {% endblock %}
+{% endblock paragraph %}

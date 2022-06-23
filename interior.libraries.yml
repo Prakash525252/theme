@@ -1,0 +1,27 @@
+global-css-and-js:
+  css:
+    theme:
+      lib/flaticon/font/flaticon.css: {}
+      lib/lightbox/css/lightbox.css: {}
+      lib/lightbox/css/lightbox.min.css: {}
+      lib/owlcarousel/assets/owl.carousel.css: {}
+      lib/owlcarousel/assets/owl.carousel.min.css: {}
+      lib/owlcarousel/assets/owl.theme.default.css: {}
+      lib/owlcarousel/assets/owl.theme.default.min.css: {}
+      lib/owlcarousel/assets/owl.theme.green.css: {}
+      lib/owlcarousel/assets/owl.theme.green.min.css: {}
+      //cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css:
+        { type: external }
+      css/style.css: {}
+      css/style.min.css: {}
+  js:
+    lib/easing/easing.js: {}
+    lib/easing/easing.min.js: {}
+    lib/isotope/isotope.pkgd.js: {}
+    lib/isotope/isotope.pkgd.min.js: {}
+    lib/lightbox/js/lightbox.js: {}
+    lib/lightbox/js/lightbox.min.js: {}
+    lib/owlcarousel/owl.carousel.js: {}
+    lib/owlcarousel/owl.carousel.min.js: {}
+    mail/jqBootstrapValidation.min.js: {}
+    js/main.js: {}

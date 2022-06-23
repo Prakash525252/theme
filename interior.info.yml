@@ -1,0 +1,24 @@
+name: Interior
+type: theme
+base theme: stable
+description: A Theme for creating a new html design
+package: Drupal
+core_version_requirement: ^8 || ^9
+
+libraries:
+  - interior/global-css-and-js
+
+regions:
+  before_header: "Before Header"
+  header: "Header"
+  after_header: "After Header"
+  content: "Content"
+  footer: "Footer"
+  footer1: "Footer1"
+  footer2: "Footer2"
+  footer3: "Footer3"
+  footer4: "footer4"
+
+# Information added by Drupal.org packaging script on 2021-03-06
+version: "8.1.3"
+project: "creative"

@@ -1,0 +1,451 @@
+<?php
+
+use Drupal\node\NodeInterface;
+use Drupal\paragraphs\Entity\Paragraph;
+use Drupal\Core\Block\BlockBase;
+use \Drupal\node\Entity\Node;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\file\Entity\File;
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Site\Settings;
+use Drupal\Core\Render\Markup;
+
+
+$active_theme = \Drupal::theme()->getActiveTheme()->getName();
+function interior_preprocess_html(&$variables) {
+    $is_front_page =  \Drupal::service('path.matcher')->isFrontPage();
+  if ($is_front_page) {
+    $variables['attributes']['class'][] = 'front';
+  } else {
+    $variables['attributes']['class'][] = 'not-front';
+  }
+ // skmn_preprocess_html($variables);
+}
+
+function interior_preprocess_page(&$variables) {
+  if (!empty($variables['page']['sidebar_first']) && !empty($variables['page']['sidebar_second'])) {
+    $variables['attributes']['class'][] = 'layout-two-sidebars';
+    $variables['page']['main_content_width'] = 6;
+  }
+  elseif (!empty($variables['page']['sidebar_first'])) {
+    $variables['attributes']['class'][] = 'layout-one-sidebar';
+    $variables['attributes']['class'][] = 'layout-sidebar-first';
+    $variables['page']['main_content_width'] = 9;
+  }
+  elseif (!empty($variables['page']['sidebar_second'])) {
+    $variables['attributes']['class'][] = 'layout-one-sidebar';
+    $variables['attributes']['class'][] = 'layout-sidebar-second';
+    $variables['page']['main_content_width'] = 9;
+  }
+  else {
+    $variables['attributes']['class'][] = 'layout-no-sidebars';
+    $variables['page']['main_content_width'] = 12;
+  }
+
+  //skmn_preprocess_page($variables);
+  //$variables['logo'] = str_replace('.svg', '.png', $variables['logo']);
+  //print_r($variables);
+  //exit;
+}
+
+function interior_form_system_theme_settings_alter(&$form, $form_state) {
+
+ // skmn_form_system_theme_settings_alter($form, $form_state);
+}
+
+/*function interior_theme($existing, $type, $theme, $path) {
+
+  return [
+	'newslatter_form' => [
+      'render element' => 'newslatter_form',
+    ],
+
+  ];
+} 
+*/
+
+
+function interior_form_system_theme_settings_submit($form, &$form_state) {
+
+  //skmn_form_system_theme_settings_submit($form, $form_state);
+}
+
+function interior_preprocess_paragraph__pragraph_test(&$variables) {
+
+    $paragraph = $variables['elements']['#paragraph'];
+    $image_id = $paragraph->get('field_image')->getValue()[0]['target_id'];
+    $file = File::load($image_id);
+    $image_url = $file->createFileUrl();
+    $variables['image_url'] = $image_url;
+
+}
+
+
+function interior_preprocess_paragraph__content_block(&$variables) {
+
+  $paragraph = $variables['elements']['#paragraph'];
+  $image_id = $paragraph->get('field_image1')->getValue()[0]['target_id'];
+  $file = File::load($image_id);
+  $image_url1 = $file->createFileUrl();
+  $variables['image_url1'] = $image_url1;
+
+}
+function interior_preprocess_paragraph__causal_slider(&$variables) {
+  $paragraph = $variables['elements']['#paragraph'];
+  $sliders = array();
+  $slider_items = $paragraph->get('field_causal_slider')->getValue();
+  $index = 0;
+  foreach($slider_items as $slider_item)
+  {
+    $index++;
+    if($index == 1)
+    {
+      $class = "carousel-item active";
+    }
+    else
+    {
+      $class = "carousel-item";
+    }
+    $p2 = Paragraph::load($slider_item['target_id']);
+    $slider_image_id = $p2->get('field_image')->getValue()[0]['target_id'];
+    $file = File::load($slider_image_id);
+    $slider_image_url = $file->createFileUrl();
+    $sliders[]= [
+        'title' => $p2->get('field_title')->value,
+        'description' => strip_tags($p2->get('field_description')->value),
+        'link' => $p2->get('field_slider_link')->value,
+        'slider_image_url' => $slider_image_url,
+        'class'     => $class
+    ];
+  }
+  $variables['sliders'] = $sliders;
+}
+
+
+
+function interior_preprocess_paragraph__learn_about_us(&$variables)
+{
+  $paragraph = $variables['elements']['#paragraph'];
+  $highlight_items = array();
+  $highlights = $paragraph->get('field_our_highlights')->getValue();
+  foreach($highlights as $highlight)
+  {
+    $p2 = Paragraph::load($highlight['target_id']);
+    $highlight_items[] = [
+      'title' => $p2->get('field_title')->value,
+      'logo' =>  $p2->get('field_highlight_logo')->value
+    ];
+  }
+  $variables['highlights'] = $highlight_items;
+}
+
+
+
+
+function interior_preprocess_paragraph__our_awesome_services(&$variables)
+{
+  $paragraph = $variables['elements']['#paragraph'];
+  $our_awesome_service = array();
+  $awesomes = $paragraph->get('field_our_awesome_blocks')->getValue();
+  foreach($awesomes as $awesome)
+  {
+    $p2 = Paragraph::load($awesome['target_id']);
+    $our_awesome_service[] = [
+      'title' => $p2->get('field_title1')->value,
+      'logo' =>  $p2->get('field_title')->value,
+      'description' => strip_tags($p2->get('field_our_awesome_block_descript')->value)
+    ];
+  }
+  $variables['awesomes'] = $our_awesome_service;
+}
+
+
+function interior_preprocess_paragraph__choose_us(&$variables) {
+
+  $paragraph = $variables['elements']['#paragraph'];
+  $image_id = $paragraph->get('field_choose_us_image')->getValue()[0]['target_id'];
+  $file = File::load($image_id);
+  $image_url1 = $file->createFileUrl();
+  $variables['image_url1'] = $image_url1;
+
+}
+
+
+
+function interior_preprocess_paragraph__our_project(&$variables)
+{
+  $paragraph = $variables['elements']['#paragraph'];
+  $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $query = \Drupal::entityQuery('node')
+    ->condition('status', 1)
+    ->condition('type', 'our_projects')
+    ->condition('langcode', $language)
+    ->sort('created' , 'DESC')
+    ->range(0, 400);
+
+  
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nids = $query->execute();
+  $nodes = $node_storage->loadMultiple($nids);
+  $projects = array();
+  
+  foreach($nodes as $node)
+  {
+      $project_title = $node->get('title')->getValue()[0]['value'];
+      $nid = $node->id();
+      $project_url = Url::fromRoute('entity.node.canonical', ['node' => $nid])->toString();
+      $project_image_id = $node->get('field_image')->getValue()[0]['target_id'];
+      $file = File::load($project_image_id);
+      $project_status_id = $node->get('field_project_status')->getValue()[0]['target_id'];
+      if($file)
+      {
+        $project_image_url = $file->createFileUrl(FALSE);
+      }
+      else
+      {
+        $project_image_url = '/';
+      }
+      
+      $projects[] = [
+        'project_title'             => $project_title,
+        'project_url'               => $project_url,
+        'project_image_url'         => $project_image_url,
+        'project_status_id'         => $project_status_id,
+        'class'                     => 'project_status_'.$project_status_id
+      ];
+  } 
+  $variables['projects'] = $projects;
+
+  $vocabulary_name = 'project_status'; //name of your vocabulary
+  $query = \Drupal::entityQuery('taxonomy_term');
+  $query->condition('vid', $vocabulary_name);
+  $query->sort('weight');
+  $tids = $query->execute();
+  $terms = Term::loadMultiple($tids);
+  $projectStatus = [];
+  foreach($terms as $term) {
+      $name = $term->getName();
+      $id   = $term->Id();
+      $projectStatus[] = [
+        'name' => $name,
+        'id'   => $id,
+        'target_class' => 'project_status_'.$id
+      ];
+  
+  }
+
+  $variables['project_status'] = $projectStatus;
+
+}
+
+
+function interior_preprocess_paragraph__our_team(&$variables)
+{
+  $paragraph = $variables['elements']['#paragraph'];
+  $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $query = \Drupal::entityQuery('node')
+    ->condition('status', 1)
+    ->condition('type', 'our_team_members')
+    ->condition('langcode', $language)
+    ->sort('created' , 'DESC')
+    ->range(0, 400);
+
+  
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nids = $query->execute();
+  $nodes = $node_storage->loadMultiple($nids);
+  $teams = array();
+  
+  foreach($nodes as $node)
+  {
+      $team_name = $node->get('field_name_of_employee')->getValue()[0]['value'];
+      $team_designation = $node->get('field_employee_designation')->getValue()[0]['value'];
+      $team_facebook = $node->get('field_facebook')->getValue()[0]['value'];
+      $team_twitter = $node->get('field_twitter')->getValue()[0]['value'];
+      $team_linkedin = $node->get('field_linkedin')->getValue()[0]['value'];
+      $nid = $node->id();
+      $team_url = Url::fromRoute('entity.node.canonical', ['node' => $nid])->toString();
+      $team_image_id = $node->get('field_employee_image')->getValue()[0]['target_id'];
+      $file = File::load($team_image_id);
+      //$project_status_id = $node->get('field_project_status')->getValue()[0]['target_id'];
+      if($file)
+      {
+        $team_image_url = $file->createFileUrl(FALSE);
+      }
+      else
+      {
+        $team_image_url = '/';
+      }
+      
+      $teams[] = [
+        'team_number_name'          => $team_name,
+        'team_designation'          => $team_designation,
+        'team_image_url'            => $team_image_url,
+        'team_facebook_id'          => $team_facebook,
+        'team_linkedin_id'          => $team_linkedin,
+        'team_twitter_id'           => $team_twitter
+      ];
+  } 
+  $variables['teams'] = $teams;
+
+}
+
+
+
+function interior_preprocess_paragraph__testimonial(&$variables)
+{
+  $paragraph = $variables['elements']['#paragraph'];
+
+  $testimonial_image_id = $paragraph->get('field_testimonial_image')->getValue()[0]['target_id'];
+  $file = File::load($testimonial_image_id);
+  $testimonial_image_url = $file->createFileUrl();
+  $variables['testimonial_image_url'] = $testimonial_image_url;
+
+  $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $query = \Drupal::entityQuery('node')
+    ->condition('status', 1)
+    ->condition('type', 'testimonial_block')
+    ->condition('langcode', $language)
+    ->sort('created' , 'DESC')
+    ->range(0, 400);
+
+  
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nids = $query->execute();
+  $nodes = $node_storage->loadMultiple($nids);
+  $testimonials = array();
+  
+  foreach($nodes as $node)
+  {
+      $client_name = $node->get('field_client_name')->getValue()[0]['value'];
+      $testimonial_description = $node->get('field_testimonial_description')->getValue()[0]['value'];
+      $testimonial_profession	 = $node->get('field_testimonial_profession')->getValue()[0]['value'];
+      $nid = $node->id();
+      $testimonial_url = Url::fromRoute('entity.node.canonical', ['node' => $nid])->toString();
+      $testimonial_image_id = $node->get('field_testimonial_profile_photo')->getValue()[0]['target_id'];
+      $file = File::load($testimonial_image_id);
+      if($file)
+      {
+        $testimonial_image_url = $file->createFileUrl(FALSE);
+      }
+      else
+      {
+        $testimonial_image_url = '/';
+      }
+      
+      $testimonials[] = [
+        'testinomial_client'               => $client_name,
+        'testimonial_description'          => $testimonial_description,
+        'testimonial_image_url'            => $testimonial_image_url,
+        'testimonial_profession'           => $testimonial_profession
+      ];
+  } 
+  $variables['testimonials'] = $testimonials;
+
+}
+
+
+
+function interior_preprocess_paragraph__our_blogs(&$variables)
+{
+  $paragraph = $variables['elements']['#paragraph'];
+  $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $query = \Drupal::entityQuery('node')
+    ->condition('status', 1)
+    ->condition('type', 'our_blogs')
+    ->condition('langcode', $language)
+    ->sort('created' , 'DESC')
+    ->range(0, 400);
+
+  
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nids = $query->execute();
+  $nodes = $node_storage->loadMultiple($nids);
+  $blogs = array();
+  
+  foreach($nodes as $node)
+  {
+      $blog_title = $node->get('field_our_blogs_title')->getValue()[0]['value'];
+      $blog_description = strip_tags($node->get('body')->getValue()[0]['value']);
+      $nid = $node->id();
+      $blog_url = Url::fromRoute('entity.node.canonical', ['node' => $nid])->toString();
+      $blog_image_id = $node->get('field_our_blogs_image')->getValue()[0]['target_id'];
+      $file = File::load($blog_image_id);
+      //$project_status_id = $node->get('field_project_status')->getValue()[0]['target_id'];
+      if($file)
+      {
+        $blog_image_url = $file->createFileUrl(FALSE);
+      }
+      else
+      {
+        $blog_image_url = '/';
+      }
+      
+      $blogs[] = [
+        'blog_title'                => $blog_title,
+        'blog_description'          => $blog_description,
+        'blog_image_url'            => $blog_image_url,
+        'blog_url'                  => $blog_url
+       
+      ];
+  } 
+  $variables['blogs'] = $blogs;
+
+}
+
+
+function interior_preprocess_node__our_blogs(&$variables)
+{
+  $node =  $variables['elements']['#node'];
+  $nid = $node->id();
+  $blog_image_id = $node->get('field_our_blogs_image')->getValue()[0]['target_id'];
+  $file = File::load($blog_image_id); 
+  if($file)
+  {
+    $blog_image_url = $file->createFileUrl(FALSE);
+  }
+  else
+  {
+    $blog_image_url = '/';
+  }
+  $variables['blog_image_url'] = $blog_image_url;
+}
+
+
+
+
+function interior_preprocess_paragraph__contact_us_menu(&$variables){
+  $contactForm = \Drupal::formBuilder()->getForm(Drupal\creative\Form\contactForm::class);
+  
+  $variables['contactForm'] = $contactForm;
+  
+}
+
+
+
+
+
+/* function barrio_pepsico_wsp_poc_preprocess_paragraph__our_achievements_section(&$variables)
+{
+  $paragraph = $variables['elements']['#paragraph'];
+  $achievement_cards = array();
+  $pepsico_achievement_cards = $paragraph->get('field_achievement_cards')->getValue();
+  foreach($pepsico_achievement_cards as $card)
+  {
+    $p2 = Paragraph::load($card['target_id']);
+    $card_image_id = intval($p2->get('field_image')->getValue()[0]['target_id']);
+    $file = File::load($card_image_id);
+    $style = \Drupal::entityTypeManager()->getStorage('image_style')->load('timeline_image_style_475_475');
+    $card_image_url = $file->createFileUrl();
+    $achievement_cards[] = [
+      'title' => $p2->get('field_card_title')->value,
+      'content' =>  $p2->get('field_card_content')->value,
+      'image_url'  => $card_image_url,
+      'id'      => $card['target_id']
+    ];
+  }
+  $variables['achievement_cards'] = $achievement_cards;
+}
+*/

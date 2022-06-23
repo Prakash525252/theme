@@ -1,0 +1,9 @@
+new_module.creative:
+  path: '/creative/creative_form'
+  defaults:
+    _form: 'Drupal\creative\src\Plugin\Block\creative'
+    _title: 'Creative Interior Design'
+  requirements:
+    _permission: 'access content'
+
+
